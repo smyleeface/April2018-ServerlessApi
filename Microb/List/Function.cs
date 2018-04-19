@@ -16,10 +16,14 @@ namespace Microb.List {
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
             try {
-                // TODO List an item
                 return new APIGatewayProxyResponse {
-                    Body = "{\"title\": \"Hello API Gateway!\", \"content\": \"foo bar\"}",
-                    StatusCode = 200
+                    Body = JsonConvert.SerializeObject(GetItems().Result),
+                    StatusCode = 200,
+                    Headers = new Dictionary<string, string>()
+                    {
+                        { "Access-Control-Allow-Origin", "*" },
+                        { "Access-Control-Allow-Credentials", "true" }
+                    }
                 };
             }
             catch (Exception e) {

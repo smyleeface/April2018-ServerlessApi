@@ -8,19 +8,29 @@ provider:
   versionFunctions: false
   stage: dev
   region: us-east-1
-#  iamRoleStatements:
-#    - Effect: Allow
-#      Action:
-#        - # TODO Add permissions to interact with DynamoDB
-#      Resource:
-#        - Fn::GetAtt: [ DynamoDBTable, Arn ]
-#        - Fn::Join: ["/", [ Fn::GetAtt: [DynamoDBTable, Arn], "index", "*"]]
+  apiKeys:
+    - hehehehehe
+  usagePlan:
+    quota:
+      limit: 5000
+      offset: 2
+      period: MONTH
+    throttle:
+      burstLimit: 200
+      rateLimit: 100
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - "dynamodb:*"
+      Resource:
+        - Fn::GetAtt: [ DynamoDBTable, Arn ]
+        - Fn::Join: ["/", [ Fn::GetAtt: [DynamoDBTable, Arn], "index", "*"]]
 
 # you can define service wide environment variables here
   environment:
     STAGE_NAME: ${self:custom.stageName}
-#    DYNAMO_TABLE_NAME:
-#      Ref: # TODO Reference the CloudFormation dynamo table here
+    DYNAMO_TABLE_NAME:
+      Ref: DynamoDBTable
 
 # Custom values that can be referenced in the Cloud Formation template
 custom:
@@ -40,11 +50,46 @@ functions:
       - http:
           path: "items"
           method: "get"
-
-  # TODO Add missing functions (Create, Read, Update, Delete)
-
+          private: true
+          cors: true
+  create-microb:
+    handler: ServerlessApi::Microb.Create.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "item"
+          method: "post"
+          private: true
+          cors: true
+  update-microb:
+    handler: ServerlessApi::Microb.Update.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items/{id}"
+          method: "put"
+          private: true
+          cors: true
+  delete-microb:
+    handler: ServerlessApi::Microb.Delete.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items/{id}"
+          method: "delete"
+          private: true
+          cors: true
+  read-microb:
+    handler: ServerlessApi::Microb.Read.Function::LambdaHandler # Assembly::Namespace.ClassName::MethodName
+    events:
+      - http:
+          path: "items/{id}"
+          method: "get"
+          private: true
+          cors: true
+          
 # you can add CloudFormation resource templates here
-#resources:
-#  Parameters: # TODO include the parameter section from the infrastructure/microb-table_cfn.yml file
-#  Resources:
-#    DynamoDBTable: # TODO include the DynamoDBTable section from the infrastructure/microb-table_cfn.yml file
+resources:
+  Parameters: ${file(infrastructure/microb-table_cfn.yml):Parameters}
+  Resources:
+    DynamoDBTable: ${file(infrastructure/microb-table_cfn.yml):Resources.DynamoDBTable}
+    S3Role: ${file(infrastructure/static-website_cfn.yml):Resources.S3Role}
+    WebsiteBucket: ${file(infrastructure/static-website_cfn.yml):Resources.WebsiteBucket}
+    WebsiteBucketPolicy: ${file(infrastructure/static-website_cfn.yml):Resources.WebsiteBucketPolicy}

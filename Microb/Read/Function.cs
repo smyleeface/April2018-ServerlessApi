@@ -12,10 +12,12 @@ namespace Microb.Read {
         [LambdaSerializer(typeof(Amazon.Lambda.Serialization.Json.JsonSerializer))]
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
-            try {
-                // TODO Read single item
+            try
+            {
+                var id = request.PathParameters["id"];
                 return new APIGatewayProxyResponse {
-                    StatusCode = 200
+                    StatusCode = 200,
+                    Body = JsonConvert.SerializeObject(GetItem(id).Result)
                 };
             }
             catch (Exception e) {

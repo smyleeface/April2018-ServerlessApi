@@ -1,0 +1,44 @@
+<html>
+<head><title>Lambda Sharp YAY!</title></head>
+<body>
+<h1>BOSS LEVEL</h1>
+<br>
+Hand holding Juan.
+
+
+<div id="app">
+    {{message}}
+    <button v-on:click="list">GET</button>
+    {{data}}
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.0"></script>
+<script>
+    var app = new Vue({
+        el: '#app',
+        data: {
+            message: 'Hello world', 
+            data:[]
+        },
+        methods:{
+            list: function(){
+                
+                var self = this;
+                this.$http.get('https://yhpfgdwdsc.execute-api.us-east-1.amazonaws.com/dev/items',  {headers: 
+                    {
+                        'x-api-key': 'REPLACE_WITH_API_KEY',
+                    }
+                }).then(function(response){
+                    if(response.status == "200"){
+                        console.log(response);
+                        self.data = response; // use self instead of this
+                    }
+                });
+            }
+        }
+    })
+</script>
+
+</body>
+</html>

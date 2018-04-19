@@ -7,6 +7,18 @@ using Newtonsoft.Json;
 
 namespace Microb.Update {
     
+    public class UpdateItem
+    {
+        [JsonProperty("id")]
+        public string Id { get; set; }
+        
+        [JsonProperty("content")]
+        public string Content { get; set; }
+
+        [JsonProperty("title")]
+        public string Title { get; set; }
+    }
+    
     class Function: MicrobFunction {
         
         //--- Methods ---
@@ -14,9 +26,11 @@ namespace Microb.Update {
         public APIGatewayProxyResponse LambdaHandler(APIGatewayProxyRequest request) {
             LambdaLogger.Log(JsonConvert.SerializeObject(request));
             try {
-                // TODO Read single item
+                var requestJson = JsonConvert.DeserializeObject<UpdateItem>(request.Body);  
+                UpdateItem(request.PathParameters["id"], requestJson.Title, requestJson.Content).Wait();
                 return new APIGatewayProxyResponse {
-                    StatusCode = 200
+                    StatusCode = 200,
+                    Body = true.ToString()
                 };
             }
             catch (Exception e) {
